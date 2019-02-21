@@ -1,7 +1,7 @@
 version: '3.7'
 services:
  zookeeper:
-   image: ubuntu_mesos_spark_python3.6_marzieh
+   image: ubuntu_mesos
    command: /home/zookeeper-3.4.12/bin/zkServer.sh start
    environment:
      ZOOKEEPER_SERVER_ID: 1
@@ -21,7 +21,7 @@ services:
     - 3888:3888
     
      master:
-   image: ubuntu_mesos_spark_python3.6_marzieh
+   image: ubuntu_mesos
    command: bash -c "sleep 40; /home/mesos-1.7.0/build/bin/mesos-master.sh --ip=150.20.11.136 --work_dir=/var/run/mesos --hostname=x.x.x.x"  ##hostname : IP of the master node
    restart: always
    network_mode: host
@@ -46,7 +46,7 @@ services:
      - 8080:8080
  
  slave:
-   image: ubuntu_mesos_spark_python3.6_marzieh
+   image: ubuntu_mesos
    command: bash -c "sleep 40; /home/mesos-1.7.0/build/bin/mesos-slave.sh --master=150.20.11.136:5050 --work_dir=/var/run/mesos  --systemd_enable_support=false"
    restart: always
    privileged: true
