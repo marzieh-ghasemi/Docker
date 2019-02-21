@@ -1,0 +1,74 @@
+version: '3.7'
+services:
+ zookeeper:
+   image: ubuntu_mesos_spark_python3.6_marzieh
+   command: /home/zookeeper-3.4.12/bin/zkServer.sh start
+   environment:
+     ZOOKEEPER_SERVER_ID: 1
+     ZOOKEEPER_CLIENT_PORT: 2188
+     ZOOKEEPER_TICK_TIME: 2000
+     ZOOKEEPER_INIT_LIMIT: 10
+     ZOOKEEPER_SYNC_LIMIT: 5
+     ZOOKEEPER_SERVERS: 0.0.0.0:2888:3888;150.20.11.157:2888:3888
+   network_mode: host
+   expose:
+    - 2188
+    - 2888
+    - 3888
+   ports:
+    - 2188:2188
+    - 2888:2888
+    - 3888:3888
+    
+     master:
+   image: ubuntu_mesos_spark_python3.6_marzieh
+   command: bash -c "sleep 40; /home/mesos-1.7.0/build/bin/mesos-master.sh --ip=150.20.11.136 --work_dir=/var/run/mesos --hostname=x.x.x.x"  ##hostname : IP of the master node
+   restart: always
+   network_mode: host
+   depends_on:
+     - zookeeper
+   environment:
+    - MESOS_HOSTNAME="150.20.11.136"
+    - MESOS_QUORUM=1
+    - MESOS_LOG_DIR=/var/log/mesos
+    - MESOS_WORK_DIR=/var/run/mesos
+#   volumes:
+#    - /srv/docker/mesos-master:/var/log/mesos
+   expose:
+     - 5050
+     - 4040
+     - 7077
+     - 8080
+   ports:
+     - 5050:5050
+     - 4040:4040
+     - 7077:7077
+     - 8080:8080
+ 
+ slave:
+   image: ubuntu_mesos_spark_python3.6_marzieh
+   command: bash -c "sleep 40; /home/mesos-1.7.0/build/bin/mesos-slave.sh --master=150.20.11.136:5050 --work_dir=/var/run/mesos  --systemd_enable_support=false"
+   restart: always
+   privileged: true
+   network_mode: host
+   depends_on:
+     - zookeeper
+   environment:
+    - MESOS_HOSTNAME="150.20.11.157"
+    - MESOS_MASTER=150.20.11.136
+    - MESOS_EXECUTOR_REGISTRATION_TIMEOUT=5mins #also in Dockerfile
+#    - MESOS_CONTAINERIZERS=docker,mesos
+    - MESOS_LOG_DIR=/var/log/mesos
+    - MESOS_LOGGING_LEVEL=INFO
+#   volumes:
+#    - /var/run/docker.sock:/var/run/docker.sock
+#    - /usr/bin/docker:/usr/bin/docker
+#    - /sys:/sys:ro
+#    - /srv/docker/mesos-slave:/var/log/mesos
+#    - /srv/docker/mesos-data/docker.tar.gz:/etc/docker.tar.gz
+   expose:
+     - 5051
+   ports:
+     - 5051:5051
+     
+    
